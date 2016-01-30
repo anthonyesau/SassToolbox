@@ -1,6 +1,18 @@
 # SassToolbox
 Collection of Sass tools
 
+To use the entire set of tools, add this repository into your Sass directory and insert the following line at the beginning of the main Sass file:
+
+```scss
+import 'sass-tools/toolbox';
+```
+
+Or you can pick and choose the specific tools to include:
+
+```scss
+import 'sass-tools/swatchbook';
+```
+
 ##1. Swatchbook
 
 The color component is allows you to easily set multiple palettes and refer to colors within them.
