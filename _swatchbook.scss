@@ -24,6 +24,7 @@ $color-palettes: (
 }
 
 //Defines or resets global temporary palette from which colors are pulled for use
+//Sets the operational palette variable (colors are always pulled from $palette-temp)
 @mixin set-palette-temp($palette: $palette-default){
   $palette-temp: find-palette($palette) !global;
 }
@@ -53,7 +54,7 @@ $color-palettes: (
         }
       }
     }
-  } @elseif $palette == placeholder {
+  } @elseif $palette == placeholder or $palette == "%" {
     @each $name, $palette in $color-palettes {
       $name: "%" + $name;
       $selector: &;
