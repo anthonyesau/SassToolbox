@@ -41,7 +41,7 @@ $color-palettes: (
   }
 }
 
-@mixin color($palette: false) {
+@mixin palette($palette: false) {
   @if $palette == false {
     @each $name, $palette in $color-palettes {
       $name: "." + $name;
@@ -67,9 +67,13 @@ $color-palettes: (
   } @else {
     $selector: &;
     $palette-temp: find-palette($palette) !global;
-    @at-root {
-      #{$selector} {
-        @content;
+    @if $selector == null {
+      @content;
+    } @else {
+      @at-root {
+        #{$selector} {
+          @content;
+        }
       }
     }
   }

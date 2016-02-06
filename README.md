@@ -1,5 +1,4 @@
-# SassToolbox
-Collection of Sass tools
+# Sass Tools
 
 To use the entire set of tools, add this repository into your Sass directory and insert the following line at the beginning of the main Sass file:
 
