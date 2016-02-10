@@ -1,0 +1,54 @@
+$media-queries: (
+  sm: (0px, 480px),
+  md: (481px, 728px),
+  lg: (729px, 1280px),
+  xlg: (1281px, 2560px)
+) !default;
+
+//Searches high and low for the query
+@function find-query($query) {
+  @if type-of($query) == "list" or type-of($query) == "map"{
+    @return $query;
+  } @elseif map-has-key($media-queries, $query) {
+    @return  map-get($media-queries, $query);
+  } @elseif type-of($query) == "number" {
+    @return  nth(map_values($media-queries), $query);
+  } @else {
+    @error "Query does not exist: " + $query;
+  }
+}
+
+@mixin media($query) {
+  //TODO Allow $query to be a list rather than only a string
+  //TODO Streamline by moving @media and @content outside @if / @elseif
+  @if str-index($query, "<=") == 1 {
+    $query: str-slice($query, 3, str-length($query));
+    $query: find-query($query);
+    @media (max-width: #{nth($query, 2)}) {
+      @content;
+    }
+  } @elseif str-index($query, ">=") == 1 {
+    $query: str-slice($query, 3, str-length($query));
+    $query: find-query($query);
+    @media (min-width: #{nth($query, 1)}) {
+      @content;
+    }
+  } @elseif str-index($query, "<") == 1 {
+    $query: str-slice($query, 2, str-length($query));
+    $query: find-query($query);
+    @media (max-width: #{nth($query, 1) - 1px}) {
+      @content;
+    }
+  } @elseif str-index($query, ">") == 1 {
+    $query: str-slice($query, 2, str-length($query));
+    $query: find-query($query);
+    @media (min-width: #{nth($query, 2) + 1px}) {
+      @content;
+    }
+  } @else {
+    $query: find-query($query);
+    @media (min-width: nth($query, 1)) and (max-width: nth($query, 2)) {
+      @content;
+    }
+  }
+}
