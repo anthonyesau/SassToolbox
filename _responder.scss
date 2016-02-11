@@ -1,9 +1,22 @@
+// Media Query Handler
+// Currently only supports 'and' operations
+// Does not support 'not' or comma separated queries
+// Define responsive ranges
+// Number range must be first two items in list
+// If units are different, smaller size should be first
+// But additional media rules can follow and will be implemented
 $media-queries: (
-  sm: (0px, 480px),
-  md: (481px, 728px),
+  sm: ("<", 480px),
+  md: (17em, 57rem),
   lg: (729px, 1280px),
-  xlg: (1281px, 2560px)
+  xlg: (">", 2560px)
 ) !default;
+
+@function unit-base($number) {
+  //TODO add more unit-bases?
+  $unit-bases: (px: 1px, em: 1em/16, rem: 1rem/16);
+  @return map-get($unit-bases, unit($number));
+}
 
 //Searches high and low for the query
 @function find-query($query) {
@@ -18,37 +31,64 @@ $media-queries: (
   }
 }
 
-@mixin media($query) {
-  //TODO Allow $query to be a list rather than only a string
-  //TODO Streamline by moving @media and @content outside @if / @elseif
-  @if str-index($query, "<=") == 1 {
-    $query: str-slice($query, 3, str-length($query));
-    $query: find-query($query);
-    @media (max-width: #{nth($query, 2)}) {
-      @content;
+//TODO rename $one and $two more descriptively
+@function media-width($one, $two) {
+  @if type-of($one) == "string" and type-of($two) == "number" {
+    @if $one == "<" {
+      @return "(max-width: #{$two})";
+    } @elseif $one == ">" {
+      @return "(min-width: #{$two})";
     }
-  } @elseif str-index($query, ">=") == 1 {
-    $query: str-slice($query, 3, str-length($query));
-    $query: find-query($query);
-    @media (min-width: #{nth($query, 1)}) {
-      @content;
+  } @elseif type-of($one) == "number" and type-of($two) == "number" {
+    @if unit($one) != unit($two) or $one < $two {
+      @return "(min-width: #{$one}) and (max-width: #{$two})";
+    } @else {
+      @return "(min-width: #{$two}) and (max-width: #{$one})";
     }
-  } @elseif str-index($query, "<") == 1 {
-    $query: str-slice($query, 2, str-length($query));
-    $query: find-query($query);
-    @media (max-width: #{nth($query, 1) - 1px}) {
-      @content;
-    }
-  } @elseif str-index($query, ">") == 1 {
-    $query: str-slice($query, 2, str-length($query));
-    $query: find-query($query);
-    @media (min-width: #{nth($query, 2) + 1px}) {
-      @content;
-    }
+  }
+  @return null; //Should this be an @error?
+}
+
+@mixin media($query...) {
+  $media-width: null;
+  @if length($query) > 1 {
+      $media-width: media-width(nth($query, 1), nth($query, 2));
   } @else {
-    $query: find-query($query);
-    @media (min-width: nth($query, 1)) and (max-width: nth($query, 2)) {
-      @content;
+    $query: nth($query, 1); //Convert to a single value from arglist
+    @if str-index($query, "<=") == 1 {
+      $query: str-slice($query, 3, str-length($query));
+      $query: find-query($query);
+      $media-width: media-width("<", nth($query, 2));
+    } @elseif str-index($query, ">=") == 1 {
+      $query: str-slice($query, 3, str-length($query));
+      $query: find-query($query);
+      $media-width: media-width(">", nth($query, 1));
+    } @elseif str-index($query, "<") == 1 {
+      $query: str-slice($query, 2, str-length($query));
+      $query: find-query($query);
+      $media-width: media-width("<", nth($query, 1) - unit-base(nth($query, 1)));
+    } @elseif str-index($query, ">") == 1 {
+      $query: str-slice($query, 2, str-length($query));
+      $query: find-query($query);
+      $media-width: media-width("<", nth($query, 2) + unit-base(nth($query, 2)));
+    } @else {
+      $query: find-query($query);
+      $media-width: media-width(nth($query, 1), nth($query, 2));
     }
+  }
+
+  $media-rules: "";
+  @if length($query) > 2 {
+    @for $i from 3 through length($query) {
+      @if $media-rules == "" {
+        $media-rules: nth($query, $i) + " and ";
+      } @else {
+        $media-rules: $media-rules + nth($query, $i) + " and ";
+      }
+    }
+  }
+
+  @media #{$media-rules + $media-width} {
+    @content;
   }
 }
