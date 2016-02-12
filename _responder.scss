@@ -1,21 +1,57 @@
 // Media Query Handler
 // Currently only supports 'and' operations
 // Does not support 'not' or comma separated queries
+
 // Define responsive ranges
 // Number range must be first two items in list
 // If units are different, smaller size should be first
-// But additional media rules can follow and will be implemented
+// But additional media rules can follow as additional list items and will be included in the media query
 $media-queries: (
   sm: ("<", 480px),
-  md: (17em, 57rem),
+  md: (481px, 728px),
   lg: (729px, 1280px),
-  xlg: (">", 2560px)
+  xlg: (">", 1280px)
 ) !default;
 
+//Create sets of values that vary across media queries
+$responsive-values: (
+  foo: ("first" "second" "third" "fourth"),
+  bar: ("apples" "bananas" "oranges" "pineapples" "cherries")
+) !default;
+
+//TODO allow these to be the name of a query as defined in $media-queries
+$media-query-index-default: 1 !default;
+$media-query-index: 1 !default;
+
+//Return the smallest quantity for a given unit label
 @function unit-base($number) {
   //TODO add more unit-bases?
   $unit-bases: (px: 1px, em: 1em/16, rem: 1rem/16);
   @return map-get($unit-bases, unit($number));
+}
+
+//Return the index of a key within a map
+@function key-index($map, $key) {
+  $keys: map-keys($map);
+  $index: index($keys, $key);
+  @return $index;
+}
+
+//Return a value from $responsive-values based on the media query index and the key (name of the value set)
+//TODO allow the argument to be only a single list
+@function responsive-value($key, $values: $responsive-values) {
+  $list: null;
+  @if type-of($values) == "map" {
+    $list: map-get($values, $key);
+  } @elseif type-of($values) == "list" {
+    $list: $values;
+  }
+  @if $list == null {
+    @error "Key for responsive value does not exist: " + $key;
+  } @else {
+    $value: nth($list, $media-query-index);
+    @return $value;
+  }
 }
 
 //Searches high and low for the query
@@ -23,14 +59,17 @@ $media-queries: (
   @if type-of($query) == "list" or type-of($query) == "map"{
     @return $query;
   } @elseif map-has-key($media-queries, $query) {
+    $media-query-index: key-index($media-queries, $query) !global; //Set the query index
     @return  map-get($media-queries, $query);
   } @elseif type-of($query) == "number" {
+    $media-query-index: $query !global; //Set the query index
     @return  nth(map_values($media-queries), $query);
   } @else {
     @error "Query does not exist: " + $query;
   }
 }
 
+//Returns a string containing a media query width rule
 //TODO rename $one and $two more descriptively
 @function media-width($one, $two) {
   @if type-of($one) == "string" and type-of($two) == "number" {
@@ -91,4 +130,6 @@ $media-queries: (
   @media #{$media-rules + $media-width} {
     @content;
   }
+
+  $media-query-index: $media-query-index-default !global; //Reset the index to default
 }
