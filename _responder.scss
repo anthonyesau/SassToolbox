@@ -54,6 +54,10 @@ $media-query-index: 1 !default;
   }
 }
 
+@function rv($key, $values: $responsive-values) {
+  @return responsive-value($key, $values);
+}
+
 //Searches high and low for the query
 @function find-query($query) {
   @if type-of($query) == "list" or type-of($query) == "map"{
@@ -132,4 +136,23 @@ $media-query-index: 1 !default;
   }
 
   $media-query-index: $media-query-index-default !global; //Reset the index to default
+}
+
+@mixin multi-media($range...) {
+  @if length($range) == 0 { //$range defaults to length($media-queries)
+    $range: (length($media-queries));
+  }
+  $start: 1;
+  $end: length($range);
+  @if length($range) == 1 {
+    $end: nth($range, 1);
+  } @elseif length($range) == 2 {
+    $start: nth($range, 1);
+    $end: nth($range, 2);
+  }
+  @for $i from $start through $end {
+    @include media(nth(map-keys($media-queries), $i)) {
+      @content;
+    }
+  }
 }
