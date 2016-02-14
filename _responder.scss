@@ -94,9 +94,9 @@ $media-query-index: 1 !default;
 
 @mixin media($query...) {
   $media-width: null;
-  @if length($query) > 1 {
+  @if length($query) > 1 { // If a list is supplied, use it directly to build the width rule
       $media-width: media-width(nth($query, 1), nth($query, 2));
-  } @else {
+  } @else { //If the query is not a list, it must be evaluated further
     $query: nth($query, 1); //Convert to a single value from arglist
     @if str-index($query, "<=") == 1 {
       $query: str-slice($query, 3, str-length($query));
@@ -109,7 +109,11 @@ $media-query-index: 1 !default;
     } @elseif str-index($query, "<") == 1 {
       $query: str-slice($query, 2, str-length($query));
       $query: find-query($query);
-      $media-width: media-width("<", nth($query, 1) - unit-base(nth($query, 1)));
+      @if type-of(nth($query, 1)) == "number" { //determines if the first value of the query is a number
+        $media-width: media-width("<", nth($query, 1) - unit-base(nth($query, 1))); //if a number, build a width rule with it
+      } @else {
+        $media-width: media-width("<", nth($query, 2) - unit-base(nth($query, 2))); //if an operator, use the 2nd value (which should be a number)
+      }
     } @elseif str-index($query, ">") == 1 {
       $query: str-slice($query, 2, str-length($query));
       $query: find-query($query);
