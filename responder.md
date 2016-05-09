@@ -113,3 +113,29 @@ Every time the `media mixin` is called, it resets `$media-query-index` to a defa
 ```scss
 $media-query-index-default: 2;
 ```
+
+## Multiple Queries
+
+To easily iterate through all the queries, invoke the `multi-media()` function.
+
+```scss
+@include media(sm) {
+  /*#{responsive-value(bar)}*/
+  /*#{responsive-value(foo)}*/
+}
+@include media(md) {
+  /*#{responsive-value(bar)}*/
+  /*#{responsive-value(foo)}*/
+}
+@include media(lg) {
+  /*#{responsive-value(bar)}*/
+  /*#{responsive-value(foo)}*/
+}
+
+// The above code can be condensed down to
+
+@include multi-media {
+  /*#{responsive-value(bar)}*/
+  /*#{responsive-value(foo)}*/
+};
+```
