@@ -52,6 +52,7 @@ To access a media query, invoke the command `@include media(/*key*/) { /*content
 }
 ```
 
+
 ## Responsive Values
 
 Another useful feature is management for standard values that vary across media queries. To create your sets, define the `$responsive-values` variable as a map with keys (the name of each set) that contain the list of changing values. The order should correspond with the order of the queries within the `$media-queries` variable. So the first value in a set within `$responsive-values` will correspond with the first query in `$media-queries`. The second value in a set within `$responsive-values` will correspond with the second query in `$media-queries` and so on.
