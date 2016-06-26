@@ -1,7 +1,7 @@
 
 # Swatchbook
 
-The color component is allows you to easily set multiple palettes and refer to colors within them.
+This color management tool allows you to easily set multiple palettes and refer to colors within them.
 
 ## Define Palettes
 
@@ -113,4 +113,33 @@ p {
   background: #f8f8f8;
   color: #333;
 }
+```
+
+
+## Convert Hue, Saturation, Brightness, & Alpha to Hex
+
+The `hsb()` function returns a hex color value based on inputs of hue, saturation, brightness, and alpha. This differs from the `hsl()` function included in Sass. `hsb()` aligns with the HSB color creation methods within Adobe software for easy color coordination from concepts and designs to actual web builds. If an alpha value other than 1 is provided, the returned value will be in the rgba() format rather than a hexadecimal.
+
+Parameters:
+* $hue — The hue of the color. Should be between 0 and 360 degrees, inclusive
+* $saturation — The saturation of the color. Must be between 0% and 100%, inclusive. Leaving of the trailing % sign is acceptable.
+* $brightness — The brightness of the color. Must be between 0% and 100%, inclusive. Leaving of the trailing % sign is acceptable.
+* $alpha — The opacity of the color. Must be between 0 and 1, inclusive
+
+```scss
+$hue: 42;
+$saturation: 65%;
+$brightness: 86%;
+$alpha: 1;
+
+.test {
+    color: hsb($hue, $saturation, $brightness, $alpha);
+}
+
+//Returns
+
+.test {
+  color: #dbb14d;
+}
+
 ```

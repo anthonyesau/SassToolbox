@@ -1,0 +1,31 @@
+.center { // Center an inner element horizontally and vertically
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-oversize { // Horizontally center an oversized object that overflows
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.clearfix:after {
+    content:" ";
+    display:table;
+    clear:both;
+}
+
+.newline { // Move elements to a new line without display:block so they don't expand to fill the entire width
+  content: '\a';
+  white-space: pre;
+  height: 0;
+}
+
+.coverParent { // Parent must be position:relative (or absolute)
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
