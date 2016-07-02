@@ -96,10 +96,11 @@ To access these values use the `responsive-value()` function and pass the name o
 }
 ```
 
-A responsive value can be accessed at any time. However, when it is called outside of the `media mixin`  it will access the value corresponding to the query as defined in the `$media-query-index` variable.
+A responsive value can be accessed at any time. However, when it is called outside of the `media mixin` it will access the value corresponding to the media query as defined in the `$media-query-index` variable. This variable can be an index number or a string name that corresponds to an item in the `$media-queries` list.
 
 ```scss
 $media-query-index: 3; //access the 3rd query
+$medai-query-index: "lg"; //access the media query named "lg"
 /*#{responsive-value(bar)}*/
 /*#{responsive-value(foo)}*/
 
@@ -107,12 +108,6 @@ $media-query-index: 3; //access the 3rd query
 
 /*oranges*/
 /*third*/
-```
-
-Every time the `media mixin` is called, it resets `$media-query-index` to a default value. Set this default with the `$media-query-index-default` variable.
-
-```scss
-$media-query-index-default: 2;
 ```
 
 ## Multiple Queries

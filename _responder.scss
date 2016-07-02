@@ -19,8 +19,10 @@ $responsive-values: (
   bar: ("apples" "bananas" "oranges" "pineapples" "cherries")
 ) !default;
 
-//TODO allow these to be the name of a query as defined in $media-queries
-$media-query-index-default: 1 !default;
+//Set the default query.
+//This can be an index number or a string name that corresponds to an item in the $media-queries list.
+//The $media-query-index variable is also temporarily modified as functions reference other media queries
+//but it is always restored to the user defined value.
 $media-query-index: 1 !default;
 
 //Return the smallest quantity for a given unit label
@@ -49,11 +51,15 @@ $media-query-index: 1 !default;
   @if $list == null {
     @error "Key for responsive value does not exist: " + $key;
   } @else {
+    @if type-of($media-query-index) == "string" {
+      $media-query-index: find-query($media-query-index);
+    }
     $value: nth($list, $media-query-index);
     @return $value;
   }
 }
 
+//Abbreviated version of @function responsive-value
 @function rv($key, $values: $responsive-values) {
   @return responsive-value($key, $values);
 }
@@ -94,6 +100,7 @@ $media-query-index: 1 !default;
 
 @mixin media($query...) {
   $media-width: null;
+  $media-query-index-temp: $media-query-index;
   @if length($query) > 1 { // If a list is supplied, use it directly to build the width rule
       $media-width: media-width(nth($query, 1), nth($query, 2));
   } @else { //If the query is not a list, it must be evaluated further
@@ -139,7 +146,7 @@ $media-query-index: 1 !default;
     @content;
   }
 
-  $media-query-index: $media-query-index-default !global; //Reset the index to default
+  $media-query-index: $media-query-index-temp !global; //Reset the index to the previously defined value
 }
 
 @mixin multi-media($range...) {
