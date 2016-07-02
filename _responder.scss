@@ -26,6 +26,8 @@ $responsive-values: (
 $media-query-index: 1 !default;
 
 //Return the smallest quantity for a given unit label
+//These small quantities are used to increment measurements slightly up or down
+//TODO rename for clarity
 @function unit-base($number) {
   //TODO add more unit-bases?
   $unit-bases: (px: 1px, em: 1em/16, rem: 1rem/16);
@@ -41,6 +43,7 @@ $media-query-index: 1 !default;
 
 //Return a value from $responsive-values based on the media query index and the key (name of the value set)
 //TODO allow the argument to be only a single list
+//TODO rename list something more aptly understood: $value-list?
 @function responsive-value($key, $values: $responsive-values) {
   $list: null;
   @if type-of($values) == "map" {
@@ -52,7 +55,7 @@ $media-query-index: 1 !default;
     @error "Key for responsive value does not exist: " + $key;
   } @else {
     @if type-of($media-query-index) == "string" {
-      $media-query-index: find-query($media-query-index);
+      $media-query-index: key-index($media-queries, $media-query-index) !global; //Set the query index
     }
     $value: nth($list, $media-query-index);
     @return $value;
@@ -65,6 +68,7 @@ $media-query-index: 1 !default;
 }
 
 //Searches high and low for the query
+//Returns a map of colors
 @function find-query($query) {
   @if type-of($query) == "list" or type-of($query) == "map"{
     @return $query;
@@ -81,6 +85,8 @@ $media-query-index: 1 !default;
 
 //Returns a string containing a media query width rule
 //TODO rename $one and $two more descriptively
+//TODO is the use of the "<" and ">" symbols confusing?
+//"max-width" "min-width" are actually meaning "<=" and ">="
 @function media-width($one, $two) {
   @if type-of($one) == "string" and type-of($two) == "number" {
     @if $one == "<" {
@@ -98,39 +104,48 @@ $media-query-index: 1 !default;
   @return null; //Should this be an @error?
 }
 
+//@include media($query) {} with content within the brackets to wrap the styles in a media query
+//This code gets confusing with the greater than, less than, equal to operators.
+//Remember that media queries use the "min" and "max" syntax that is inclusive of measurements.
+//So adjustments have to be made to create a truly greater than or less than operator.
 @mixin media($query...) {
   $media-width: null;
-  $media-query-index-temp: $media-query-index;
+  $media-query-index-temp: $media-query-index; //store the user defined $media-query-index
   @if length($query) > 1 { // If a list is supplied, use it directly to build the width rule
       $media-width: media-width(nth($query, 1), nth($query, 2));
   } @else { //If the query is not a list, it must be evaluated further
     $query: nth($query, 1); //Convert to a single value from arglist
-    @if str-index($query, "<=") == 1 {
-      $query: str-slice($query, 3, str-length($query));
+    @if str-index($query, "<=") == 1 { //if query starts with "<="
+      $query: str-slice($query, 3, str-length($query)); //Trim operator off front of query
       $query: find-query($query);
       $media-width: media-width("<", nth($query, 2));
     } @elseif str-index($query, ">=") == 1 {
-      $query: str-slice($query, 3, str-length($query));
+      $query: str-slice($query, 3, str-length($query));//Trim operator off front of query
       $query: find-query($query);
       $media-width: media-width(">", nth($query, 1));
     } @elseif str-index($query, "<") == 1 {
-      $query: str-slice($query, 2, str-length($query));
+      $query: str-slice($query, 2, str-length($query));//Trim operator off front of query
       $query: find-query($query);
       @if type-of(nth($query, 1)) == "number" { //determines if the first value of the query is a number
         $media-width: media-width("<", nth($query, 1) - unit-base(nth($query, 1))); //if a number, build a width rule with it
+        //Since media queries use min and max syntax, the comparative measurement is inclusive.
+        //To create a greater than or less than comparison, the measurement must be incremented slightly higher or lower
+        //so that the original measurement is NOT included within the possible range
       } @else {
         $media-width: media-width("<", nth($query, 2) - unit-base(nth($query, 2))); //if an operator, use the 2nd value (which should be a number)
       }
     } @elseif str-index($query, ">") == 1 {
-      $query: str-slice($query, 2, str-length($query));
+      $query: str-slice($query, 2, str-length($query));//Trim operator off front of query
       $query: find-query($query);
       $media-width: media-width("<", nth($query, 2) + unit-base(nth($query, 2)));
     } @else {
-      $query: find-query($query);
+      $query: find-query($query); //if no operator is in the query, search for it as a name or index
       $media-width: media-width(nth($query, 1), nth($query, 2));
     }
   }
 
+  //Gather any extra rules aside from statements about width
+  //These rules would follow the two width statements in the $media-queries list
   $media-rules: "";
   @if length($query) > 2 {
     @for $i from 3 through length($query) {
@@ -142,11 +157,11 @@ $media-query-index: 1 !default;
     }
   }
 
-  @media #{$media-rules + $media-width} {
+  @media #{$media-rules + $media-width} { //Combine the width and other rules of the media query
     @content;
   }
 
-  $media-query-index: $media-query-index-temp !global; //Reset the index to the previously defined value
+  $media-query-index: $media-query-index-temp !global; //Restore the index to the user defined value
 }
 
 @mixin multi-media($range...) {
