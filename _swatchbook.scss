@@ -5,6 +5,12 @@ $color-palettes: (
   light: (fg: #333, bg: #f8f8f8, accent: #ba9f61, fg-subtle: #808080, bg-subtle: #e5e5e5)
 ) !default;
 
+//Set the default palette.
+//This can be an index number or a string name that corresponds to an item in the $color-palettes list.
+//The $palette-index variable is also temporarily modified as functions reference other palettes
+//but it is always restored to the user defined value.
+$palette-index: 1;
+
 // Convert Hue, Saturation, Brightness, & Alpha to Hex
 // Function Author:  Alexander Futekov via SitePoint
 // Source URL: http://codepen.io/SitePoint/pen/fpqDg
@@ -32,22 +38,9 @@ $color-palettes: (
   }
 }
 
-//Defines or resets global default palette
-@mixin set-palette-default($palette: 1){
-  $palette-default: find-palette($palette) !global;
-}
 
-//Defines or resets global temporary palette from which colors are pulled for use
-//Sets the operational palette variable (colors are always pulled from $palette-temp)
-@mixin set-palette-temp($palette: $palette-default){
-  $palette-temp: find-palette($palette) !global;
-}
-
-@include set-palette-default();
-
-@include set-palette-temp();
-
-@function color($color, $palette: $palette-temp){
+//Return a color from a palette
+@function color($color, $palette: $palette-index){
   $palette: find-palette($palette);
   @if type-of($color) == "number" {
     @return nth($palette, $color);
@@ -57,11 +50,12 @@ $color-palettes: (
 }
 
 @mixin palette($palette: false) {
-  @if $palette == false {
+  $palette-index-temp: $palette-index; //store the user defined $palette-index
+  @if $palette == false { //Iterate through all the color palettes if no single palette is specified
     @each $name, $palette in $color-palettes {
       $name: "." + $name;
       $selector: &;
-      $palette-temp: find-palette($palette) !global;
+      $palette-index: find-palette($palette) !global;
       @at-root {
         #{$name}-palette #{$selector} {
           @content;
@@ -72,7 +66,7 @@ $color-palettes: (
     @each $name, $palette in $color-palettes {
       $name: "%" + $name;
       $selector: &;
-      $palette-temp: find-palette($palette) !global;
+      $palette-index: find-palette($palette) !global;
       @at-root {
         #{$name}-palette #{$selector} {
           @content;
@@ -81,7 +75,7 @@ $color-palettes: (
     }
   } @else {
     $selector: &;
-    $palette-temp: find-palette($palette) !global;
+    $palette-index: find-palette($palette) !global;
     @if $selector == null {
       @content;
     } @else {
@@ -92,5 +86,5 @@ $color-palettes: (
       }
     }
   }
-  @include set-palette-temp();
+  $palette-index: $palette-index-temp !global; //restore the user defined value
 }

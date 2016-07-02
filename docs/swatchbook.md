@@ -15,20 +15,13 @@ $color-palettes: (
 );
 ```
 
-Define the `$color-palettes` variable prior to importing the Sass tools. Otherwise you will need to run several commands to implement your palettes:
-
-```scss
-@include set-palette-default(); //Sets the default palette
-@include set-palette-temp(); //Sets the operational palette variable
-```
-
 The first palette defined is set as the default, but you can change it to whatever you want at any point within your Sass file:
 
 ```scss
-@include set-palette-default(dark); // sets the dark palette as default
-@include set-palette-default(3); // sets the 3rd palette (accent) as default
-@include set-palette-default((fg: #f8f8f8, bg: #333, accent: #ba9f61, fg-subtle: #ccc, bg-subtle: #808080)); //sets the map of colors provided as the default palette
+$palette-index: "dark"; // sets the dark palette as default
+$palette-index: 3; // sets the 3rd palette (accent) as default
 ```
+The string name or number must correspond with a palette defined in the `$color-palettes` variable.
 
 ## Accessing colors
 
@@ -100,12 +93,11 @@ p {
 An alternative to accomplish the same:
 
 ```scss
-@include set-palette-temp(light); // Sets palette
+$palette-index: "light"; // Sets palette
 p {
   background: color(bg);
   color: color(fg);
 }
-@include set-palette-temp; // Resets palette to default
 
 // becomes
 
