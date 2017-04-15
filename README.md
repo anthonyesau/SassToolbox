@@ -1,6 +1,7 @@
 # Sass Tools
 
 * [Baseline](/docs/baseline.md)
+* [Fluid](/docs/fluid.md)
 * [Helpers](/docs/helpers.md)
 * [Responder](/docs/responder.md)
 * [Swatchbook](/docs/swatchbook.md)
@@ -16,6 +17,7 @@ Or you can pick and choose the specific tools to include:
 
 ```scss
 @import 'sass-tools/baseline.scss';
+@import 'sass-tools/fluid';
 @import 'sass-tools/helpers.scss';
 @import 'sass-tools/responder';
 @import 'sass-tools/swatchbook';

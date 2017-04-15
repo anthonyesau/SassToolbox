@@ -1,0 +1,63 @@
+$fluid-values: (
+  width: (640px 1280px),
+) !default;
+
+/// Remove the unit of a length
+/// @param {Number} $number - Number to remove unit from
+/// @return {Number} - Unitless number
+@function strip-unit($number) {
+  @if type-of($number) == 'number' and not unitless($number) {
+    @return $number / ($number * 0 + 1);
+  }
+
+  @return $number;
+}
+
+@function fluid-value($key, $values: $fluid-values) {
+  $list: map-get($values, $key);
+  $min_val: nth($list, 1);
+  $max_val: nth($list, 2);
+  $widths: map-get($values, "width");
+  $min_width: nth($widths, 1);
+  $max_width: nth($widths, 2);
+  $fluid_calc: calc( #{$min_val} + (#{strip-unit($max_val)} - #{strip-unit($min_val)}) * ( (100vw - #{$min_width}) / ( #{strip-unit($max_width)} - #{strip-unit($min_width)}) ));
+  $fluid: ($min_val $fluid_calc $max_val);
+  $value: nth($fluid, $fluid-index);
+  @return $value;
+}
+
+// Shorthand for fluid-value
+@function fv($key, $values: $fluid-values) {
+  @return fluid-value($key, $values);
+}
+
+@function manual-fluid-value($min_val, $max_val, $min_width: $min_width, $max_width: $max_width) {
+  $fluid_calc: calc( #{$min_val} + (#{strip-unit($max_val)} - #{strip-unit($min_val)}) * ( (100vw - #{$min_width}) / ( #{strip-unit($max_width)} - #{strip-unit($min_width)}) ));
+  $fluid: ($min_val $fluid_calc $max_val);
+  $value: nth($fluid, $fluid-index);
+  @return $value;
+}
+
+// Shorthand for manual-fluid-value
+@function mfv($min_val, $max_val, $min_width: $min_width, $max_width: $max_width) {
+  @return manual-fluid-value($min_val, $max_val, $min_width: $min_width, $max_width: $max_width);
+}
+
+@mixin fluid($values: $fluid-values) {
+  $widths: map-get($values, "width");
+  $min_width: nth($widths, 1);
+  $max_width: nth($widths, 2);
+
+  $fluid-index: 1 !global;
+  @content;
+
+  @media (min-width: #{$min_width}) and (max-width: #{$max_width}){
+    $fluid-index: 2 !global;
+    @content;
+  }
+
+  @media (min-width: #{$max_width}){
+    $fluid-index: 3 !global;
+    @content;
+  }
+}
