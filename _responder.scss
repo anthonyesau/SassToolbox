@@ -112,13 +112,7 @@ $media-query-index: 1 !default;
   $media-width: null;
   $media-query-index-temp: $media-query-index; //store the user defined $media-query-index
   @if length($query) > 1 { // If a list is supplied, use it directly to build the width rule
-      $one: nth($query, 1);
-      $two: nth($query, 2);
-      @if type-of($one) == "string" and type-of($two) == "string" {
-        $one: find-query($one);
-        $two: find-query($two);
-      }
-      $media-width: media-width($one, $two);
+    $media-width: media-width(nth($query, 1), nth($query, 2));
   } @else { //If the query is not a list, it must be evaluated further
     $query: nth($query, 1); //Convert to a single value from arglist
     @if str-index($query, "<=") == 1 { //if query starts with "<="
