@@ -1,9 +1,10 @@
 $fluid-values: (
-  width: (400px 1920px),
+  vw: (400px 1920px),
+  baserem: (16px 24px)
 ) !default;
 
-$min_width: nth(map-get($fluid-values, "width"), 1) !default;
-$max_width: nth(map-get($fluid-values, "width"), 2) !default;
+$min_vw: nth(map-get($fluid-values, "vw"), 1) !default;
+$max_vw: nth(map-get($fluid-values, "vw"), 2) !default;
 
 /// Remove the unit of a length
 /// @param {Number} $number - Number to remove unit from
@@ -20,10 +21,10 @@ $max_width: nth(map-get($fluid-values, "width"), 2) !default;
   $list: map-get($values, $key);
   $min_val: nth($list, 1);
   $max_val: nth($list, 2);
-  $widths: map-get($values, "width");
-  $min_width: nth($widths, 1);
-  $max_width: nth($widths, 2);
-  $fluid_calc: calc( #{$min_val} + (#{strip-unit($max_val)} - #{strip-unit($min_val)}) * ( (100vw - #{$min_width}) / ( #{strip-unit($max_width)} - #{strip-unit($min_width)}) ));
+  $vws: map-get($values, "vw");
+  $min_vw: nth($vws, 1);
+  $max_vw: nth($vws, 2);
+  $fluid_calc: calc( #{$min_val} + (#{strip-unit($max_val)} - #{strip-unit($min_val)}) * ( (100vw - #{$min_vw}) / ( #{strip-unit($max_vw)} - #{strip-unit($min_vw)}) ));
   $fluid: ($min_val $fluid_calc $max_val);
   $value: nth($fluid, $fluid-index);
   @return $value;
@@ -34,32 +35,32 @@ $max_width: nth(map-get($fluid-values, "width"), 2) !default;
   @return fluid-value($key, $values);
 }
 
-@function manual-fluid-value($min_val, $max_val, $min_width: $min_width, $max_width: $max_width) {
-  $fluid_calc: calc( #{$min_val} + (#{strip-unit($max_val)} - #{strip-unit($min_val)}) * ( (100vw - #{$min_width}) / ( #{strip-unit($max_width)} - #{strip-unit($min_width)}) ));
+@function manual-fluid-value($min_val, $max_val, $min_vw: $min_vw, $max_vw: $max_vw) {
+  $fluid_calc: calc( #{$min_val} + (#{strip-unit($max_val)} - #{strip-unit($min_val)}) * ( (100vw - #{$min_vw}) / ( #{strip-unit($max_vw)} - #{strip-unit($min_vw)}) ));
   $fluid: ($min_val $fluid_calc $max_val);
   $value: nth($fluid, $fluid-index);
   @return $value;
 }
 
 // Shorthand for manual-fluid-value
-@function mfv($min_val, $max_val, $min_width: $min_width, $max_width: $max_width) {
-  @return manual-fluid-value($min_val, $max_val, $min_width: $min_width, $max_width: $max_width);
+@function mfv($min_val, $max_val, $min_vw: $min_vw, $max_vw: $max_vw) {
+  @return manual-fluid-value($min_val, $max_val, $min_vw: $min_vw, $max_vw: $max_vw);
 }
 
 @mixin fluid($values: $fluid-values) {
-  $widths: map-get($values, "width");
-  $min_width: nth($widths, 1);
-  $max_width: nth($widths, 2);
+  $vws: map-get($values, "vw");
+  $min_vw: nth($vws, 1);
+  $max_vw: nth($vws, 2);
 
   $fluid-index: 1 !global;
   @content;
 
-  @media (min-width: #{$min_width}) and (max-width: #{$max_width}){
+  @media (min-width: #{$min_vw}) and (max-width: #{$max_vw}){
     $fluid-index: 2 !global;
     @content;
   }
 
-  @media (min-width: #{$max_width}){
+  @media (min-width: #{$max_vw}){
     $fluid-index: 3 !global;
     @content;
   }
