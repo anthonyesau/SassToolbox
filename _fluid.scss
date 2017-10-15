@@ -1,6 +1,9 @@
 $fluid-values: (
-  width: (640px 1280px),
+  width: (400px 1920px),
 ) !default;
+
+$min_width: nth(map-get($fluid-values, "width"), 1) !default;
+$max_width: nth(map-get($fluid-values, "width"), 2) !default;
 
 /// Remove the unit of a length
 /// @param {Number} $number - Number to remove unit from
