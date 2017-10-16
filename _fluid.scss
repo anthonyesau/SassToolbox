@@ -17,24 +17,6 @@ $max_vw: nth(map-get($fluid-values, "vw"), 2) !default;
   @return $number;
 }
 
-@function fluid-value($key, $values: $fluid-values) {
-  $list: map-get($values, $key);
-  $min_val: nth($list, 1);
-  $max_val: nth($list, 2);
-  $vws: map-get($values, "vw");
-  $min_vw: nth($vws, 1);
-  $max_vw: nth($vws, 2);
-  $fluid_calc: calc( #{$min_val} + (#{strip-unit($max_val)} - #{strip-unit($min_val)}) * ( (100vw - #{$min_vw}) / ( #{strip-unit($max_vw)} - #{strip-unit($min_vw)}) ));
-  $fluid: ($min_val $fluid_calc $max_val);
-  $value: nth($fluid, $fluid-index);
-  @return $value;
-}
-
-// Shorthand for fluid-value
-@function fv($key, $values: $fluid-values) {
-  @return fluid-value($key, $values);
-}
-
 @function manual-fluid-value($min_val, $max_val, $min_vw: $min_vw, $max_vw: $max_vw) {
   $fluid_calc: calc( #{$min_val} + (#{strip-unit($max_val)} - #{strip-unit($min_val)}) * ( (100vw - #{$min_vw}) / ( #{strip-unit($max_vw)} - #{strip-unit($min_vw)}) ));
   $fluid: ($min_val $fluid_calc $max_val);
@@ -45,6 +27,52 @@ $max_vw: nth(map-get($fluid-values, "vw"), 2) !default;
 // Shorthand for manual-fluid-value
 @function mfv($min_val, $max_val, $min_vw: $min_vw, $max_vw: $max_vw) {
   @return manual-fluid-value($min_val, $max_val, $min_vw: $min_vw, $max_vw: $max_vw);
+}
+
+@function fluid-value($key, $values: $fluid-values) {
+  $list: map-get($values, $key);
+  $min_val: nth($list, 1);
+  $max_val: nth($list, 2);
+  $vws: map-get($values, "vw");
+  $min_vw: nth($vws, 1);
+  $max_vw: nth($vws, 2);
+  @return manual-fluid-value($min_val, $max_val, $min_vw, $max_vw);
+}
+
+// Shorthand for fluid-value
+@function fv($key, $values: $fluid-values) {
+  @return fluid-value($key, $values);
+}
+
+// At any given viewport width, calculate the value of 1rem.
+@function calculate-fluid-rem-value($vw, $values: $fluid-values) {
+  $list: map-get($values, "baserem");
+  $min_val: nth($list, 1);
+  $max_val: nth($list, 2);
+  $vws: map-get($values, "vw");
+  $min_vw: nth($vws, 1);
+  $max_vw: nth($vws, 2);
+  $rem_val: $min_val + ( strip-unit($max_val) - strip-unit($min_val) ) * ( ( $vw - $min_vw ) / ( strip-unit($max_vw) - strip-unit($min_vw) ) );
+  @return $rem_val;
+}
+
+// Fluid transition between two rem measurements
+// when the base rem is already a fluid value
+@function fluid-rem($key, $values: $fluid-values) {
+  $list: map-get($values, $key);
+  $min_val: nth($list, 1);
+  $max_val: nth($list, 2);
+  $vws: map-get($values, "vw");
+  $min_vw: nth($vws, 1);
+  $min_vw: $min_vw / calculate-fluid-rem-value($min_vw) * 1rem;
+  $max_vw: nth($vws, 2);
+  $max_vw: $max_vw / calculate-fluid-rem-value($max_vw) * 1rem;
+  @return manual-fluid-value($min_val, $max_val, $min_vw, $max_vw);
+}
+
+// Shorthand for fluid-rem
+@function fr($key, $values: $fluid-values) {
+  @return fluid-rem($key, $values);
 }
 
 @mixin fluid($values: $fluid-values) {
